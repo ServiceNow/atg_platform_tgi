@@ -4,6 +4,7 @@ import torch.distributed
 import numpy as np
 
 from torch.nn import functional as F
+from loguru import logger
 
 from dataclasses import dataclass
 from opentelemetry import trace
@@ -488,6 +489,15 @@ class FlashCausalLM(Model):
         pre_allocate_past_size: Optional[int] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         # Model Forward
+        
+        logger.info("---------------------------- input_ids_size {}\n".format(input_ids.shape()))
+        logger.info("---------------------------- position_ids_size {}".format(position_ids.shape()))
+        logger.info("---------------------------- position_ids {}".format(position_ids))
+        logger.info("---------------------------- cu_seqlens_size {}".format(cu_seqlens.shape()))
+        logger.info("---------------------------- cu_seqlens_size {}".format(cu_seqlens.shape()))
+        logger.info("---------------------------- cu_seqlens_q_size {}".format(cu_seqlens_q.shape()))
+        logger.info("---------------------------- max_s {}".format(max_s))
+        
         return self.model.forward(
             input_ids=input_ids,
             position_ids=position_ids,

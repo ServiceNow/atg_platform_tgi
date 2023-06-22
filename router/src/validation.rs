@@ -30,9 +30,9 @@ impl Validation {
         max_input_length: usize,
         max_total_tokens: usize,
     ) -> Self {
-        if max_input_length >= max_total_tokens {
-            panic!("`max_input_length` must be < `max_total_tokens`");
-        }
+        // if max_input_length >= max_total_tokens {
+        //     panic!("`max_input_length` must be < `max_total_tokens`");
+        // }
 
         // If we have a fast tokenizer
         let sender = if let Some(tokenizer) = tokenizer {
@@ -88,21 +88,21 @@ impl Validation {
             let total_tokens = input_length + max_new_tokens as usize;
 
             // Validate MaxTotalTokens
-            if total_tokens > self.max_total_tokens {
-                return Err(ValidationError::MaxTotalTokens(
-                    self.max_total_tokens,
-                    input_length,
-                    max_new_tokens,
-                ));
-            }
+            // if total_tokens > self.max_total_tokens {
+            //     return Err(ValidationError::MaxTotalTokens(
+            //         self.max_total_tokens,
+            //         input_length,
+            //         max_new_tokens,
+            //     ));
+            // }
 
             // Validate InputLength
-            if input_length > self.max_input_length {
-                return Err(ValidationError::InputLength(
-                    self.max_input_length,
-                    input_length,
-                ));
-            }
+            // if input_length > self.max_input_length {
+            //     return Err(ValidationError::InputLength(
+            //         self.max_input_length,
+            //         input_length,
+            //     ));
+            // }
 
             metrics::histogram!("tgi_request_input_length", input_length as f64);
             Ok((inputs, input_length))
@@ -115,12 +115,12 @@ impl Validation {
             let input_length = truncate.unwrap_or(self.max_input_length);
 
             // Validate MaxNewTokens
-            if (input_length as u32 + max_new_tokens) > self.max_total_tokens as u32 {
-                return Err(ValidationError::MaxNewTokens(
-                    self.max_total_tokens - self.max_input_length,
-                    max_new_tokens,
-                ));
-            }
+            // if (input_length as u32 + max_new_tokens) > self.max_total_tokens as u32 {
+            //     return Err(ValidationError::MaxNewTokens(
+            //         self.max_total_tokens - self.max_input_length,
+            //         max_new_tokens,
+            //     ));
+            // }
 
             Ok((inputs, input_length))
         }

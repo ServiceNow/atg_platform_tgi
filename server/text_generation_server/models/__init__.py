@@ -1,4 +1,5 @@
 import torch
+import os
 
 from loguru import logger
 from transformers.configuration_utils import PretrainedConfig
@@ -18,7 +19,13 @@ from text_generation_server.models.gpt_neox import GPTNeoxSharded
 from text_generation_server.models.t5 import T5Sharded
 
 try:
-    if torch.cuda.is_available():
+    if not os.getenv("USE_FLASH_ATTENTION", "").lower() == "false":
+        if not torch.cuda.is_available():
+            FLASH_ATT_ERROR_MESSAGE = (
+                "{} requires CUDA. No compatible CUDA devices found."
+            )
+            raise ImportError("CUDA is not available")
+
         major, minor = torch.cuda.get_device_capability()
         is_sm75 = major == 7 and minor == 5
         is_sm8x = major == 8 and minor >= 0
@@ -26,21 +33,24 @@ try:
 
         supported = is_sm75 or is_sm8x or is_sm90
         if not supported:
+            FLASH_ATT_ERROR_MESSAGE = (
+                "{} requires a CUDA device with capability 7.5, > 8.0 or 9.0. "
+                "No compatible CUDA device found."
+            )
             raise ImportError(
                 f"GPU with CUDA capability {major} {minor} is not supported"
             )
 
-        from text_generation_server.models.flash_neox import FlashNeoX, FlashNeoXSharded
         from text_generation_server.models.flash_rw import FlashRW, FlashRWSharded
+        from text_generation_server.models.flash_neox import FlashNeoXSharded, FlashNeoX
         from text_generation_server.models.flash_llama import (
             FlashLlama,
             FlashLlamaSharded,
         )
         from text_generation_server.models.flash_santacoder import (
-            FlashSantacoder,
             FlashSantacoderSharded,
+            FlashSantacoder,
         )
-
         FLASH_ATTENTION = True
     else:
         FLASH_ATTENTION = False
@@ -49,6 +59,8 @@ except ImportError:
         "Could not import Flash Attention enabled models"
     )
     FLASH_ATTENTION = False
+
+logger.info("---------------------------- FLASH ATTENTION IS {}".format(FLASH_ATTENTION))
 
 __all__ = [
     "Model",

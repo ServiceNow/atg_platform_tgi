@@ -1,5 +1,6 @@
 import torch
 import inspect
+from loguru import logger
 
 from dataclasses import dataclass
 from opentelemetry import trace
@@ -526,6 +527,12 @@ class CausalLM(Model):
         }
         if self.has_position_ids:
             kwargs["position_ids"] = position_ids
+            
+        logger.info("---------------------------- input_ids_size {}\n".format(input_ids.shape()))
+        logger.info("---------------------------- attention_mask_size {}\n".format(attention_mask.shape()))
+        logger.info("---------------------------- attention_mask {}".format(attention_mask))
+        logger.info("---------------------------- position_ids_size {}".format(position_ids.shape()))
+        logger.info("---------------------------- position_ids {}".format(position_ids))
 
         outputs = self.model.forward(**kwargs)
         return outputs.logits, outputs.past_key_values
